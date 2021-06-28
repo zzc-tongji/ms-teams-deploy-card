@@ -7,7 +7,7 @@ import { Fact, PotentialAction } from "../models";
 import { formatCozyLayout } from "./cozy";
 
 export function formatFilesToDisplay(
-  files: Octokit.ReposGetCommitResponseFilesItem[],
+  files: any,
   allowedLength: number,
   htmlUrl: string
 ) {
@@ -35,7 +35,7 @@ export function formatFilesToDisplay(
 }
 
 export function formatCompleteLayout(
-  commit: Octokit.Response<Octokit.ReposGetCommitResponse>,
+  commit: any,
   conclusion: string,
   elapsedSeconds?: number
 ) {
@@ -48,7 +48,7 @@ export function formatCompleteLayout(
   section.activityText = undefined;
   section.potentialAction = renderActions(
     `${repoUrl}/actions/runs/${process.env.GITHUB_RUN_ID}`,
-    commit.data.html_url
+    commit.html_url
   );
 
   // Set status and elapsedSeconds
@@ -66,7 +66,7 @@ export function formatCompleteLayout(
     new Fact("Status:", labels),
     new Fact(
       "Commit message:",
-      escapeMarkdownTokens(commit.data.commit.message)
+      escapeMarkdownTokens(commit.commit.message)
     ),
     new Fact("Repository & branch:", `[${branchUrl}](${branchUrl})`),
   ];
@@ -108,9 +108,9 @@ export function formatCompleteLayout(
       allowedFileLen === "" ? "7" : allowedFileLen
     );
     const filesToDisplay = formatFilesToDisplay(
-      commit.data.files,
+      commit.files,
       allowedFileLenParsed,
-      commit.data.html_url
+      commit.html_url
     );
     section.facts?.push({
       name: "Files changed:",

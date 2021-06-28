@@ -1,3 +1,29 @@
+The repository is forked from [toko-bifrost/ms-teams-deploy-card](https://github.com/toko-bifrost/ms-teams-deploy-card).
+
+A new branch `linux-curl` is created to force using Linux command `curl` to fetch data.
+
+Some configuration are changed:
+
+| Name              | Required | Default | Description                                                  |
+| ----------------- | -------- | ------- | ------------------------------------------------------------ |
+| `show-on-exit`    | `true`   | None    | Enable the following two options or not                      |
+| `show-on-failure` | `true`   | None    | Show an MS Teams card upon **_exiting_** this Github Actions job and status is `FAILURE` |
+| `show-on-success` | `true`   | None    | Show an MS Teams card upon **_exiting_** this Github Actions job and status is `SUCCESS` |
+
+Usage as following:
+
+``` yaml
+- uses: zzc-tongji/ms-teams-deploy-card@linux-curl
+  with:
+    http-proxy: 'http://127.0.0.1:1080'
+    github-token: ${{ github.token }}
+    webhook-uri: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
+```
+
+
+
+---
+
 # Microsoft Teams Deploy Card
 
 ![MS Teams Deploy Card](https://github.com/toko-bifrost/ms-teams-deploy-card/workflows/MS%20Teams%20Deploy%20Card/badge.svg)

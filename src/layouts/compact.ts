@@ -4,11 +4,10 @@ import { getInput } from "@actions/core";
 import { CONCLUSION_THEMES } from "../constants";
 
 export function formatCompactLayout(
-  commit: Octokit.Response<Octokit.ReposGetCommitResponse>,
+  commit: any,
   conclusion: string,
   elapsedSeconds?: number
 ) {
-  const author = commit.data.author;
   const repoUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}`;
   const shortSha = process.env.GITHUB_SHA?.substr(0, 7);
   const runLink = `${repoUrl}/actions/runs/${process.env.GITHUB_RUN_ID}`;
@@ -31,8 +30,8 @@ export function formatCompactLayout(
 
   webhookBody.text =
     `${labels} &nbsp; CI [#${process.env.GITHUB_RUN_NUMBER}](${runLink}) ` +
-    `(commit [${shortSha}](${commit.data.html_url})) on [${process.env.GITHUB_REPOSITORY}](${repoUrl}) ` +
-    `by [@${author.login}](${author.html_url})`;
+    `(commit [${shortSha}](${commit.html_url})) on [${process.env.GITHUB_REPOSITORY}](${repoUrl}) ` +
+    `by [@${commit.author.login}](${commit.author.html_url})`;
 
   return webhookBody;
 }

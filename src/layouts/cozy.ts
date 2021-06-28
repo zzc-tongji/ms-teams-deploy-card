@@ -11,7 +11,7 @@ export const OCTOCAT_LOGO_URL =
   "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png";
 
 export function formatCozyLayout(
-  commit: Octokit.Response<Octokit.ReposGetCommitResponse>,
+  commit: any,
   conclusion: string,
   elapsedSeconds?: number
 ) {
@@ -41,20 +41,19 @@ export function formatCozyLayout(
   // Get potential actions
   const actions = renderActions(
     `${repoUrl}/actions/runs/${process.env.GITHUB_RUN_ID}`,
-    commit.data.html_url
+    commit.html_url
   );
   const actionsConcat = actions
     .map((action) => ` &nbsp; &nbsp; [${action.name}](${action.target})`)
     .join("");
 
-  const author = commit.data.author;
   // Set sections
   webhookBody.sections = [
     {
       activityTitle: `**CI #${process.env.GITHUB_RUN_NUMBER} (commit ${shortSha})** on [${process.env.GITHUB_REPOSITORY}](${repoUrl})`,
-      activityImage: author?.avatar_url || OCTOCAT_LOGO_URL,
-      activitySubtitle: author
-        ? `by [@${author.login}](${author.html_url}) on ${nowFmt}`
+      activityImage: commit.author?.avatar_url || OCTOCAT_LOGO_URL,
+      activitySubtitle: commit.author
+        ? `by [@${commit.author.login}](${commit.author.html_url}) on ${nowFmt}`
         : nowFmt,
       activityText: `${labels}${actionsConcat}`,
     },

@@ -1,3 +1,4 @@
+import { exec } from "child_process";
 import { Octokit } from "@octokit/rest";
 import { setOutput, info, getInput, warning } from "@actions/core";
 import fetch, { Response } from "node-fetch";
@@ -38,32 +39,40 @@ export async function getOctokitCommit() {
   info("Workflow run information: " + JSON.stringify(runInfo, undefined, 2));
 
   const githubToken = getInput("github-token", { required: true });
-  const octokit = new Octokit({ auth: `token ${githubToken}` });
-
-  return await octokit.repos.getCommit({
-    owner: runInfo.owner,
-    repo: runInfo.repo,
-    ref: runInfo.ref || "",
+  const command = `curl -H 'Authorization: token ${githubToken}' 'https://api.github.com/repos/${runInfo.owner}/${runInfo.repo}/commits/${runInfo.ref}' 2>/dev/null`;
+  return new Promise((resolve, reject) => {
+    exec(command, { encoding: "utf8" }, (error, stdout) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      console.log('commits', stdout);
+      resolve(JSON.parse(stdout));
+    });
   });
+}
+
+const safeText: (origin: string) => string = (origin) => {
+  return origin.replace(/'/g, "");
 }
 
 export function submitNotification(webhookBody: WebhookBody) {
   const webhookUri = getInput("webhook-uri", { required: true });
   const webhookBodyJson = JSON.stringify(webhookBody, undefined, 2);
 
-  return fetch(webhookUri, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: webhookBodyJson,
-  })
-    .then((response: Response) => {
+  const command = `curl -d '${safeText(JSON.stringify(webhookBody))}' -H 'Content-Type: application/json;charset=utf-8' -X POST '${safeText(webhookUri)}' 2>/dev/null`;
+  return new Promise((resolve) => {
+    exec(command, { encoding: "utf8" }, (error, stdout) => {
+      if (error) {
+        console.error(error);
+        resolve('')
+        return ;
+      }
       setOutput("webhook-body", webhookBodyJson);
       info(webhookBodyJson);
-      return response;
-    })
-    .catch(console.error);
+      resolve(stdout);
+    });
+  });
 }
 
 export async function formatAndNotify(
@@ -89,21 +98,26 @@ export async function formatAndNotify(
 export async function getWorkflowRunStatus() {
   const runInfo = getRunInformation();
   const githubToken = getInput("github-token", { required: true });
-  const octokit = new Octokit({ auth: `token ${githubToken}` });
-  const workflowJobs = await octokit.actions.listJobsForWorkflowRun({
-    owner: runInfo.owner,
-    repo: runInfo.repo,
-    run_id: parseInt(runInfo.runId || "1"),
+  const command = `curl -H 'Authorization: token ${githubToken}' 'https://api.github.com/repos/${runInfo.owner}/${runInfo.repo}/actions/runs/${runInfo.runId || "1"}/jobs' 2>/dev/null`;
+  const workflowJobs: any = await new Promise((resolve, reject) => {
+    exec(command, { encoding: "utf8" }, (error, stdout) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      console.log('commits', stdout);
+      resolve(JSON.parse(stdout));
+    });
   });
 
-  const job = workflowJobs.data.jobs.find(
-    (job: Octokit.ActionsListJobsForWorkflowRunResponseJobsItem) =>
+  const job = workflowJobs.jobs.find(
+    (job: any) =>
       job.name === process.env.GITHUB_JOB
   );
 
   let lastStep;
   const stoppedStep = job?.steps.find(
-    (step: Octokit.ActionsListJobsForWorkflowRunResponseJobsItemStepsItem) =>
+    (step: any) =>
       step.conclusion === "failure" ||
       step.conclusion === "timed_out" ||
       step.conclusion === "cancelled" ||
@@ -117,7 +131,7 @@ export async function getWorkflowRunStatus() {
       .reverse()
       .find(
         (
-          step: Octokit.ActionsListJobsForWorkflowRunResponseJobsItemStepsItem
+          step: any
         ) => step.status === "completed"
       );
   }
