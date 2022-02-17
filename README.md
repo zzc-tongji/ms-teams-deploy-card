@@ -2,16 +2,6 @@ The repository is forked from [toko-bifrost/ms-teams-deploy-card](https://github
 
 A new branch `windows-invoke-webrequest` is created to force using Windows command `Invoke-WebRequest` to fetch data.
 
-Before usage, following steps should be done on host machines:
-
-- Create or update `$PSHome\Profile.ps1` by adding a new line `[Net.ServicePointManager]::SecurityProtocol = "tls13, tls12, tls11, tls, ssl3"`.
-
-  Reference: [Powershell Invoke-WebRequest Fails with SSL/TLS Secure Channel](https://stackoverflow.com/questions/41618766/powershell-invoke-webrequest-fails-with-ssl-tls-secure-channel)
-
-- Open `Control Panel \ Network and Internet \ Internet Options > Trusted sites` and add `abort:security_powershell.exe`.
-
-  Reference: [Invoke-WebRequest causes IE content blocked dialog](https://stackoverflow.com/questions/25862955/invoke-webrequest-causes-ie-content-blocked-dialog)
-
 Some configuration are changed:
 
 | Name              | Required | Default | Description                                                  |

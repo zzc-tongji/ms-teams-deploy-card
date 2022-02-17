@@ -39,7 +39,7 @@ export async function getOctokitCommit() {
   info("Workflow run information: " + JSON.stringify(runInfo, undefined, 2));
 
   const githubToken = getInput("github-token", { required: true });
-  const command = `powershell.exe (Invoke-WebRequest -UseBasicParsing -Headers @{'Authorization'='token ${githubToken}'} -Uri 'https://api.github.com/repos/${runInfo.owner}/${runInfo.repo}/commits/${runInfo.ref}').Content`;
+  const command = `powershell.exe [Net.ServicePointManager]::SecurityProtocol = '"tls13, tls12, tls11, tls, ssl3"'; (Invoke-WebRequest -UseBasicParsing -Headers @{'Authorization'='token ${githubToken}'} -Uri 'https://api.github.com/repos/${runInfo.owner}/${runInfo.repo}/commits/${runInfo.ref}').Content`;
   return new Promise((resolve, reject) => {
     exec(command, { encoding: "utf8" }, (error, stdout) => {
       if (error) {
@@ -60,7 +60,7 @@ export function submitNotification(webhookBody: WebhookBody) {
   const webhookUri = getInput("webhook-uri", { required: true });
   const webhookBodyJson = JSON.stringify(webhookBody, undefined, 2);
 
-  const command = `powershell.exe Invoke-WebRequest -UseBasicParsing -Body '${safeText(JSON.stringify(webhookBody))}' -Headers @{'Content-Type'='application/json'} -Method POST -Uri '${safeText(webhookUri)}'`;
+  const command = `powershell.exe [Net.ServicePointManager]::SecurityProtocol = '"tls13, tls12, tls11, tls, ssl3"'; Invoke-WebRequest -UseBasicParsing -Body '${safeText(JSON.stringify(webhookBody))}' -Headers @{'Content-Type'='application/json'} -Method POST -Uri '${safeText(webhookUri)}'`;
   return new Promise((resolve) => {
     exec(command, { encoding: "utf8" }, (error, stdout) => {
       if (error) {
@@ -98,7 +98,7 @@ export async function formatAndNotify(
 export async function getWorkflowRunStatus() {
   const runInfo = getRunInformation();
   const githubToken = getInput("github-token", { required: true });
-  const command = `powershell.exe (Invoke-WebRequest -UseBasicParsing -Headers @{'Authorization'='token ${githubToken}'} -Uri 'https://api.github.com/repos/${runInfo.owner}/${runInfo.repo}/actions/runs/${runInfo.runId || "1"}/jobs').Content`;
+  const command = `powershell.exe [Net.ServicePointManager]::SecurityProtocol = '"tls13, tls12, tls11, tls, ssl3"'; (Invoke-WebRequest -UseBasicParsing -Headers @{'Authorization'='token ${githubToken}'} -Uri 'https://api.github.com/repos/${runInfo.owner}/${runInfo.repo}/actions/runs/${runInfo.runId || "1"}/jobs').Content`;
   const workflowJobs: any = await new Promise((resolve, reject) => {
     exec(command, { encoding: "utf8" }, (error, stdout) => {
       if (error) {
